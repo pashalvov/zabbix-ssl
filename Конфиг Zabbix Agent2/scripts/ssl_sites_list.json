@@ -1,0 +1,48 @@
+{
+    "data":  [
+                 {
+                     "{#SITEADDRESS}":  "https://pravo.ru.case.one/",
+                     "{#SITEPORT}":  443
+                 },
+                 {
+                     "{#SITEADDRESS}":  "https://fin.ru.case.one/",
+                     "{#SITEPORT}":  443
+                 },
+                 {
+                     "{#SITEADDRESS}":  "https://kis-pravoru.casepro.pro/",
+                     "{#SITEPORT}":  443
+                 },
+                 {
+                     "{#SITEADDRESS}":  "https://okr.ru.case.one/",
+                     "{#SITEPORT}":  443
+                 },
+                 {
+                     "{#SITEADDRESS}":  "https://sales.ru.case.one/",
+                     "{#SITEPORT}":  443
+                 },
+                 {
+                     "{#SITEADDRESS}":  "https://e1.pravo.tech/",
+                     "{#SITEPORT}":  443
+                 },
+                 {
+                     "{#SITEADDRESS}":  "https://maket.pravo.tech/",
+                     "{#SITEPORT}":  443
+                 },
+                 {
+                     "{#SITEADDRESS}":  "https://copyfin.corp.pravo.tech/",
+                     "{#SITEPORT}":  443
+                 },
+                 {
+                     "{#SITEADDRESS}":  "https://pravoru.form.one/",
+                     "{#SITEPORT}":  443
+                 },
+                 {
+                     "{#SITEADDRESS}":  "https://hrpravo.form.one/",
+                     "{#SITEPORT}":  443
+                 },
+                 {
+                     "{#SITEADDRESS}":  "https://backpravo.doc.one/",
+                     "{#SITEPORT}":  443
+                 }
+             ]
+}
