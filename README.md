@@ -48,7 +48,7 @@ sudo apt update && sudo apt install sudo apt install zabbix-agent2 -y
 zabbix_agent2 -c /etc/zabbix/zabbix_agent2.d/userparameters_ssl_cert_check.conf -t 'ssl.sites.list'
 ```
 В терминале должен появится список сайтов в формате JSON и код выхода программы должен равняться 0:
-```json
+```
 ssl.sites.list                                [s|{
     "data":  [
                  {
