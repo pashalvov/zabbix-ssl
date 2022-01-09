@@ -1,6 +1,6 @@
 zabbix_export:
   version: '5.4'
-  date: '2022-01-08T11:27:56Z'
+  date: '2022-01-09T04:44:35Z'
   groups:
     -
       uuid: 7df96b18c230490a9a0a9e2307226338
@@ -14,7 +14,7 @@ zabbix_export:
       template: 'Template SSL cert monitoring'
       name: 'Шаблон Мониторинг SSL сертификатов'
       description: |
-        Версия 1.0
+        Версия 1.1
         
         https://github.com/pashalvov/zabbix-ssl
         
@@ -116,8 +116,8 @@ zabbix_export:
               trigger_prototypes:
                 -
                   uuid: a9a3de2f95004bbe858292e01b020cc9
-                  expression: '(last(/Template SSL cert monitoring/ssl.cert.not_after[{#SITEADDRESS}]) - now()) / 86400 < {$CERT.EXPIRY.ALARM}'
-                  name: 'Сертификат сайта {#SITEADDRESS} истекает через 15 дней'
+                  expression: '(last(/Template SSL cert monitoring/ssl.cert.not_after[{#SITEADDRESS}]) - now()) / 86400 < {$SSL.EXPIRY.ALARM}'
+                  name: 'Сертификат сайта {#SITEADDRESS} истекает через {$SSL.EXPIRY.ALARM} дней'
                   priority: DISASTER
                   description: 'Тревога об истечении срока действия сертификата.'
                   dependencies:
@@ -132,15 +132,16 @@ zabbix_export:
                       tag: Site
                       value: '{#SITEADDRESS}'
                 -
-                  uuid: bc047a2dbb424ae98952250c834af872
-                  expression: '(last(/Template SSL cert monitoring/ssl.cert.not_after[{#SITEADDRESS}]) - now()) / 86400 < {$CERT.EXPIRY.WARN}'
-                  name: 'Сертификат сайта {#SITEADDRESS} истекает через 30 дней'
-                  priority: HIGH
-                  description: 'Тревога об истечении срока действия сертификата.'
+                  uuid: 5de4eed7e9334e18aa74073dafca8fc2
+                  expression: '(last(/Template SSL cert monitoring/ssl.cert.not_after[{#SITEADDRESS}]) - now()) / 86400 < {$SSL.EXPIRY.INFO}'
+                  name: 'Сертификат сайта {#SITEADDRESS} истекает через {$SSL.EXPIRY.INFO} дней'
+                  priority: INFO
+                  description: 'Информация об истечении срока действия сертификата.'
+                  manual_close: 'YES'
                   dependencies:
                     -
-                      name: 'Сертификат сайта {#SITEADDRESS} истекает через 15 дней'
-                      expression: '(last(/Template SSL cert monitoring/ssl.cert.not_after[{#SITEADDRESS}]) - now()) / 86400 < {$CERT.EXPIRY.ALARM}'
+                      name: 'Сертификат сайта {#SITEADDRESS} истекает через {$SSL.EXPIRY.WARN} дней'
+                      expression: '(last(/Template SSL cert monitoring/ssl.cert.not_after[{#SITEADDRESS}]) - now()) / 86400 < {$SSL.EXPIRY.WARN}'
                     -
                       name: 'Сертификат сайта {#SITEADDRESS} не прошёл валидацию'
                       expression: 'find(/Template SSL cert monitoring/ssl.cert.value[{#SITEADDRESS}],,"like","invalid")=1'
@@ -152,16 +153,15 @@ zabbix_export:
                       tag: Site
                       value: '{#SITEADDRESS}'
                 -
-                  uuid: 5de4eed7e9334e18aa74073dafca8fc2
-                  expression: '(last(/Template SSL cert monitoring/ssl.cert.not_after[{#SITEADDRESS}]) - now()) / 86400 < {$CERT.EXPIRY.INFO}'
-                  name: 'Сертификат сайта {#SITEADDRESS} истекает через 90 дней'
-                  priority: INFO
-                  description: 'Информация об истечении срока действия сертификата.'
-                  manual_close: 'YES'
+                  uuid: bc047a2dbb424ae98952250c834af872
+                  expression: '(last(/Template SSL cert monitoring/ssl.cert.not_after[{#SITEADDRESS}]) - now()) / 86400 < {$SSL.EXPIRY.WARN}'
+                  name: 'Сертификат сайта {#SITEADDRESS} истекает через {$SSL.EXPIRY.WARN} дней'
+                  priority: HIGH
+                  description: 'Тревога об истечении срока действия сертификата.'
                   dependencies:
                     -
-                      name: 'Сертификат сайта {#SITEADDRESS} истекает через 30 дней'
-                      expression: '(last(/Template SSL cert monitoring/ssl.cert.not_after[{#SITEADDRESS}]) - now()) / 86400 < {$CERT.EXPIRY.WARN}'
+                      name: 'Сертификат сайта {#SITEADDRESS} истекает через {$SSL.EXPIRY.ALARM} дней'
+                      expression: '(last(/Template SSL cert monitoring/ssl.cert.not_after[{#SITEADDRESS}]) - now()) / 86400 < {$SSL.EXPIRY.ALARM}'
                     -
                       name: 'Сертификат сайта {#SITEADDRESS} не прошёл валидацию'
                       expression: 'find(/Template SSL cert monitoring/ssl.cert.value[{#SITEADDRESS}],,"like","invalid")=1'
@@ -450,15 +450,15 @@ zabbix_export:
                   value: '{#SITEADDRESS}'
       macros:
         -
-          macro: '{$CERT.EXPIRY.ALARM}'
+          macro: '{$SSL.EXPIRY.ALARM}'
           value: '15'
           description: 'Количество дней до триггера Тревога конца действия сертификата'
         -
-          macro: '{$CERT.EXPIRY.INFO}'
+          macro: '{$SSL.EXPIRY.INFO}'
           value: '90'
           description: 'Количество дней до триггера Информация конца действия сертификата'
         -
-          macro: '{$CERT.EXPIRY.WARN}'
+          macro: '{$SSL.EXPIRY.WARN}'
           value: '30'
           description: 'Количество дней до триггера Предупреждение конца действия сертификата'
       valuemaps:
