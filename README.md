@@ -52,11 +52,11 @@ zabbix_agent2 -c /etc/zabbix/zabbix_agent2.d/userparameters_ssl_cert_check.conf 
 ssl.sites.list                                [s|{
     "data":  [
                  {
-                     "{#SITEADDRESS}":  "pravo.ru.case.one",
+                     "{#SITEADDRESS}":  "google.ru",
                      "{#SITEPORT}":  "443"
                  },
                  {
-                     "{#SITEADDRESS}":  "fin.ru.case.one",
+                     "{#SITEADDRESS}":  "ya.ru",
                      "{#SITEPORT}":  "443"
                  }
              ]
