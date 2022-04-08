@@ -1,10 +1,12 @@
-﻿Clear-Host
+﻿#Requires -Version 7
+
+Clear-Host
 
 $SaveResultsPath = Join-Path (Split-Path -Parent $PSScriptRoot) 'Конфиг Zabbix Agent2\scripts\ssl_sites_list.json'
 
 try
 {
-    $ImportSiteList = Import-Csv -Path (Join-Path $PSScriptRoot SiteList.csv) -Encoding UTF8 -Delimiter ";" -ErrorAction Stop
+    $ImportSiteList = Import-Csv -Path (Join-Path $PSScriptRoot SiteList.csv) -Encoding utf8NoBOM -Delimiter ";" -ErrorAction Stop
 }
 catch
 {
@@ -30,6 +32,8 @@ foreach ($Site in $ImportSiteList)
         $SiteList = [ordered]@{
             '{#SITEADDRESS}' = [uri]::new($Site.SITEADDRESS)
             '{#SITEPORT}' = [int]$Site.SITEPORT
+            '{#SITEDESCRIPTION}' = $Site.SITEDESCRIPTION
+            '{#SITEKEYPATH}' = $Site.SITEKEYPATH
         }
         $Results += New-Object -TypeName PSObject -Property $SiteList
     }

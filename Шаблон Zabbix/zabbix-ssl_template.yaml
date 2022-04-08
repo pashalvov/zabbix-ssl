@@ -1,6 +1,6 @@
 zabbix_export:
   version: '5.4'
-  date: '2022-01-09T04:44:35Z'
+  date: '2022-04-08T14:31:46Z'
   groups:
     -
       uuid: 7df96b18c230490a9a0a9e2307226338
@@ -14,7 +14,7 @@ zabbix_export:
       template: 'Template SSL cert monitoring'
       name: 'Шаблон Мониторинг SSL сертификатов'
       description: |
-        Версия 1.1
+        Версия 1.2 от 08.04.2022
         
         https://github.com/pashalvov/zabbix-ssl
         
@@ -35,12 +35,16 @@ zabbix_export:
           item_prototypes:
             -
               uuid: 48fd8cdad05b4d7ab2b1665b7f7369fd
-              name: 'Доступность сайта {#SITEADDRESS}'
+              name: 'Доступность сайта {#SITEADDRESS}:{#SITEPORT}'
               type: SIMPLE
               key: 'net.tcp.service[https,{#SITEADDRESS},{#SITEPORT}]'
               history: 1d
               trends: '0'
-              description: 'Проверяет доступность заголовка HEAD, 0 если недоступен, 1 если доступен'
+              description: |
+                Проверяет доступность заголовка HEAD, 0 если недоступен, 1 если доступен
+                
+                Описание сайта: {#SITEDESCRIPTION}
+                Путь ключей для обновления: {#SITEKEYPATH}
               valuemap:
                 name: 'Доступность сайта'
               tags:
@@ -49,14 +53,18 @@ zabbix_export:
                   value: SSL
                 -
                   tag: Site
-                  value: '{#SITEADDRESS}'
+                  value: '{#SITEADDRESS}:{#SITEPORT}'
               trigger_prototypes:
                 -
                   uuid: 221d1136a55046309c778567a86526fc
                   expression: 'max(/Template SSL cert monitoring/net.tcp.service[https,{#SITEADDRESS},{#SITEPORT}],5m)<=0'
-                  name: 'Сайта {#SITEADDRESS} недоступен'
+                  name: 'Сайт {#SITEADDRESS}:{#SITEPORT} недоступен'
                   priority: DISASTER
-                  description: 'Сайт не отвечает на проверку'
+                  description: |
+                    Сайт не отвечает на проверку
+                    
+                    Описание сайта: {#SITEDESCRIPTION}
+                    Путь ключей для обновления: {#SITEKEYPATH}
                   manual_close: 'YES'
                   tags:
                     -
@@ -64,17 +72,21 @@ zabbix_export:
                       value: 'SSL RAW'
                     -
                       tag: Site
-                      value: '{#SITEADDRESS}'
+                      value: '{#SITEADDRESS}:{#SITEPORT}'
             -
               uuid: 7638ff975d5146dfb7c709a32a8f6edd
-              name: 'Альтернативные имена для сайта {#SITEADDRESS}'
+              name: 'Альтернативные имена для сайта {#SITEADDRESS}:{#SITEPORT}'
               type: DEPENDENT
-              key: 'ssl.cert.alternative_names[{#SITEADDRESS}]'
+              key: 'ssl.cert.alternative_names[{#SITEADDRESS}:{#SITEPORT}]'
               delay: '0'
               history: 7d
               trends: '0'
               value_type: TEXT
-              description: 'Альтернативные имена которые храниться в сертификате для сайта  {#SITEADDRESS}'
+              description: |
+                Альтернативные имена которые храниться в сертификате для сайта  {#SITEADDRESS}
+                
+                Описание сайта: {#SITEDESCRIPTION}
+                Путь ключей для обновления: {#SITEKEYPATH}
               preprocessing:
                 -
                   type: JSONPATH
@@ -88,17 +100,21 @@ zabbix_export:
                   value: SSL
                 -
                   tag: Site
-                  value: '{#SITEADDRESS}'
+                  value: '{#SITEADDRESS}:{#SITEPORT}'
             -
               uuid: dd40ffc968454c74a34f51752ced7645
-              name: 'Дата конца срока действия сертификата для сайта {#SITEADDRESS}'
+              name: 'Дата конца срока действия сертификата для сайта {#SITEADDRESS}:{#SITEPORT}'
               type: DEPENDENT
-              key: 'ssl.cert.not_after[{#SITEADDRESS}]'
+              key: 'ssl.cert.not_after[{#SITEADDRESS}:{#SITEPORT}]'
               delay: '0'
               history: 7d
               trends: '0'
               units: unixtime
-              description: 'Показывает срок до какой даты действителен сертификат. Значение приводится к временной зоне Zabbix пользователя'
+              description: |
+                Показывает срок до какой даты действителен сертификат. Значение приводится к временной зоне Zabbix пользователя
+                
+                Описание сайта: {#SITEDESCRIPTION}
+                Путь ключей для обновления: {#SITEKEYPATH}
               preprocessing:
                 -
                   type: JSONPATH
@@ -112,76 +128,22 @@ zabbix_export:
                   value: SSL
                 -
                   tag: Site
-                  value: '{#SITEADDRESS}'
+                  value: '{#SITEADDRESS}:{#SITEPORT}'
               trigger_prototypes:
                 -
-                  uuid: a9a3de2f95004bbe858292e01b020cc9
-                  expression: '(last(/Template SSL cert monitoring/ssl.cert.not_after[{#SITEADDRESS}]) - now()) / 86400 < {$SSL.EXPIRY.ALARM}'
-                  name: 'Сертификат сайта {#SITEADDRESS} истекает через {$SSL.EXPIRY.ALARM} дней'
-                  priority: DISASTER
-                  description: 'Тревога об истечении срока действия сертификата.'
-                  dependencies:
-                    -
-                      name: 'Сертификат сайта {#SITEADDRESS} не прошёл валидацию'
-                      expression: 'find(/Template SSL cert monitoring/ssl.cert.value[{#SITEADDRESS}],,"like","invalid")=1'
-                  tags:
-                    -
-                      tag: Application
-                      value: SSL
-                    -
-                      tag: Site
-                      value: '{#SITEADDRESS}'
-                -
-                  uuid: 5de4eed7e9334e18aa74073dafca8fc2
-                  expression: '(last(/Template SSL cert monitoring/ssl.cert.not_after[{#SITEADDRESS}]) - now()) / 86400 < {$SSL.EXPIRY.INFO}'
-                  name: 'Сертификат сайта {#SITEADDRESS} истекает через {$SSL.EXPIRY.INFO} дней'
-                  priority: INFO
-                  description: 'Информация об истечении срока действия сертификата.'
-                  manual_close: 'YES'
-                  dependencies:
-                    -
-                      name: 'Сертификат сайта {#SITEADDRESS} истекает через {$SSL.EXPIRY.WARN} дней'
-                      expression: '(last(/Template SSL cert monitoring/ssl.cert.not_after[{#SITEADDRESS}]) - now()) / 86400 < {$SSL.EXPIRY.WARN}'
-                    -
-                      name: 'Сертификат сайта {#SITEADDRESS} не прошёл валидацию'
-                      expression: 'find(/Template SSL cert monitoring/ssl.cert.value[{#SITEADDRESS}],,"like","invalid")=1'
-                  tags:
-                    -
-                      tag: Application
-                      value: SSL
-                    -
-                      tag: Site
-                      value: '{#SITEADDRESS}'
-                -
-                  uuid: bc047a2dbb424ae98952250c834af872
-                  expression: '(last(/Template SSL cert monitoring/ssl.cert.not_after[{#SITEADDRESS}]) - now()) / 86400 < {$SSL.EXPIRY.WARN}'
-                  name: 'Сертификат сайта {#SITEADDRESS} истекает через {$SSL.EXPIRY.WARN} дней'
-                  priority: HIGH
-                  description: 'Тревога об истечении срока действия сертификата.'
-                  dependencies:
-                    -
-                      name: 'Сертификат сайта {#SITEADDRESS} истекает через {$SSL.EXPIRY.ALARM} дней'
-                      expression: '(last(/Template SSL cert monitoring/ssl.cert.not_after[{#SITEADDRESS}]) - now()) / 86400 < {$SSL.EXPIRY.ALARM}'
-                    -
-                      name: 'Сертификат сайта {#SITEADDRESS} не прошёл валидацию'
-                      expression: 'find(/Template SSL cert monitoring/ssl.cert.value[{#SITEADDRESS}],,"like","invalid")=1'
-                  tags:
-                    -
-                      tag: Application
-                      value: SSL
-                    -
-                      tag: Site
-                      value: '{#SITEADDRESS}'
-                -
                   uuid: efb80fdaccad4e22b22630de17733bc4
-                  expression: 'nodata(/Template SSL cert monitoring/ssl.cert.not_after[{#SITEADDRESS}],8h)=1'
-                  name: 'Сертификат сайта {#SITEADDRESS} недоступен'
-                  priority: DISASTER
-                  description: 'Нет данных по какому-либо сертификату'
+                  expression: 'nodata(/Template SSL cert monitoring/ssl.cert.not_after[{#SITEADDRESS}:{#SITEPORT}],8h)=1'
+                  name: 'Нет свежих данных по сертификату {#SITEADDRESS}:{#SITEPORT}'
+                  priority: AVERAGE
+                  description: |
+                    Нет данных по какому-либо сертификату
+                    
+                    Описание сайта: {#SITEDESCRIPTION}
+                    Путь ключей для обновления: {#SITEKEYPATH}
                   manual_close: 'YES'
                   dependencies:
                     -
-                      name: 'Сайта {#SITEADDRESS} недоступен'
+                      name: 'Сайт {#SITEADDRESS}:{#SITEPORT} недоступен'
                       expression: 'max(/Template SSL cert monitoring/net.tcp.service[https,{#SITEADDRESS},{#SITEPORT}],5m)<=0'
                   tags:
                     -
@@ -189,17 +151,91 @@ zabbix_export:
                       value: 'SSL RAW'
                     -
                       tag: Site
-                      value: '{#SITEADDRESS}'
+                      value: '{#SITEADDRESS}:{#SITEPORT}'
+                -
+                  uuid: a9a3de2f95004bbe858292e01b020cc9
+                  expression: '(last(/Template SSL cert monitoring/ssl.cert.not_after[{#SITEADDRESS}:{#SITEPORT}]) - now()) / 86400 < {$SSL.EXPIRY.ALARM}'
+                  name: 'Сертификат сайта {#SITEADDRESS}:{#SITEPORT} истекает менее чем через {$SSL.EXPIRY.ALARM} дней'
+                  priority: DISASTER
+                  description: |
+                    Тревога об истечении срока действия сертификата.
+                    
+                    Описание сайта: {#SITEDESCRIPTION}
+                    Путь ключей для обновления: {#SITEKEYPATH}
+                  dependencies:
+                    -
+                      name: 'Сертификат сайта {#SITEADDRESS}:{#SITEPORT} не прошёл валидацию'
+                      expression: 'find(/Template SSL cert monitoring/ssl.cert.value[{#SITEADDRESS}:{#SITEPORT}],,"like","invalid")=1'
+                  tags:
+                    -
+                      tag: Application
+                      value: 'SSL Trigger'
+                    -
+                      tag: Site
+                      value: '{#SITEADDRESS}:{#SITEPORT}'
+                -
+                  uuid: 5de4eed7e9334e18aa74073dafca8fc2
+                  expression: '(last(/Template SSL cert monitoring/ssl.cert.not_after[{#SITEADDRESS}:{#SITEPORT}]) - now()) / 86400 < {$SSL.EXPIRY.INFO}'
+                  name: 'Сертификат сайта {#SITEADDRESS}:{#SITEPORT} истекает менее чем через {$SSL.EXPIRY.INFO} дней'
+                  priority: INFO
+                  description: |
+                    Информация об истечении срока действия сертификата.
+                    
+                    Описание сайта: {#SITEDESCRIPTION}
+                    Путь ключей для обновления: {#SITEKEYPATH}
+                  manual_close: 'YES'
+                  dependencies:
+                    -
+                      name: 'Сертификат сайта {#SITEADDRESS}:{#SITEPORT} истекает менее чем через {$SSL.EXPIRY.WARN} дней'
+                      expression: '(last(/Template SSL cert monitoring/ssl.cert.not_after[{#SITEADDRESS}:{#SITEPORT}]) - now()) / 86400 < {$SSL.EXPIRY.WARN}'
+                    -
+                      name: 'Сертификат сайта {#SITEADDRESS}:{#SITEPORT} не прошёл валидацию'
+                      expression: 'find(/Template SSL cert monitoring/ssl.cert.value[{#SITEADDRESS}:{#SITEPORT}],,"like","invalid")=1'
+                  tags:
+                    -
+                      tag: Application
+                      value: 'SSL Trigger'
+                    -
+                      tag: Site
+                      value: '{#SITEADDRESS}:{#SITEPORT}'
+                -
+                  uuid: bc047a2dbb424ae98952250c834af872
+                  expression: '(last(/Template SSL cert monitoring/ssl.cert.not_after[{#SITEADDRESS}:{#SITEPORT}]) - now()) / 86400 < {$SSL.EXPIRY.WARN}'
+                  name: 'Сертификат сайта {#SITEADDRESS}:{#SITEPORT} истекает менее чем через {$SSL.EXPIRY.WARN} дней'
+                  priority: HIGH
+                  description: |
+                    Тревога об истечении срока действия сертификата.
+                    
+                    Описание сайта: {#SITEDESCRIPTION}
+                    Путь ключей для обновления: {#SITEKEYPATH}
+                  dependencies:
+                    -
+                      name: 'Сертификат сайта {#SITEADDRESS}:{#SITEPORT} истекает менее чем через {$SSL.EXPIRY.ALARM} дней'
+                      expression: '(last(/Template SSL cert monitoring/ssl.cert.not_after[{#SITEADDRESS}:{#SITEPORT}]) - now()) / 86400 < {$SSL.EXPIRY.ALARM}'
+                    -
+                      name: 'Сертификат сайта {#SITEADDRESS}:{#SITEPORT} не прошёл валидацию'
+                      expression: 'find(/Template SSL cert monitoring/ssl.cert.value[{#SITEADDRESS}:{#SITEPORT}],,"like","invalid")=1'
+                  tags:
+                    -
+                      tag: Application
+                      value: 'SSL Trigger'
+                    -
+                      tag: Site
+                      value: '{#SITEADDRESS}:{#SITEPORT}'
             -
               uuid: fe544aa9fa324ba092458ef991b28030
-              name: 'Дата начала срока действия сертификата сайта {#SITEADDRESS}'
+              name: 'Дата начала срока действия сертификата сайта {#SITEADDRESS}:{#SITEPORT}'
               type: DEPENDENT
-              key: 'ssl.cert.not_before[{#SITEADDRESS}]'
+              key: 'ssl.cert.not_before[{#SITEADDRESS}:{#SITEPORT}]'
               delay: '0'
               history: 7d
               trends: '0'
               units: unixtime
-              description: 'Показывает срок начала действия сертификата сайта {#SITEADDRESS}. Значение приводится к временной зоне Zabbix пользователя.'
+              description: |
+                Показывает срок начала действия сертификата сайта {#SITEADDRESS}:{#SITEPORT}. Значение приводится к временной зоне Zabbix пользователя.
+                
+                Описание сайта: {#SITEDESCRIPTION}
+                Путь ключей для обновления: {#SITEKEYPATH}
               preprocessing:
                 -
                   type: JSONPATH
@@ -213,17 +249,21 @@ zabbix_export:
                   value: SSL
                 -
                   tag: Site
-                  value: '{#SITEADDRESS}'
+                  value: '{#SITEADDRESS}:{#SITEPORT}'
             -
               uuid: 3373e94c9c254d9e8c0c404dd348fa76
-              name: 'Алгоритм публичного ключа сертификата сайта {#SITEADDRESS}'
+              name: 'Алгоритм публичного ключа сертификата сайта {#SITEADDRESS}:{#SITEPORT}'
               type: DEPENDENT
-              key: 'ssl.cert.public_key_algorithm[{#SITEADDRESS}]'
+              key: 'ssl.cert.public_key_algorithm[{#SITEADDRESS}:{#SITEPORT}]'
               delay: '0'
               history: 7d
               trends: '0'
               value_type: CHAR
-              description: 'Алгоритм публичного ключа сертификата сайта {#SITEADDRESS}'
+              description: |
+                Алгоритм публичного ключа сертификата сайта {#SITEADDRESS}:{#SITEPORT}
+                
+                Описание сайта: {#SITEDESCRIPTION}
+                Путь ключей для обновления: {#SITEKEYPATH}
               preprocessing:
                 -
                   type: JSONPATH
@@ -237,17 +277,21 @@ zabbix_export:
                   value: SSL
                 -
                   tag: Site
-                  value: '{#SITEADDRESS}'
+                  value: '{#SITEADDRESS}:{#SITEPORT}'
             -
               uuid: 3b979bfce40447c4a8468a78f108a667
-              name: 'Серийный номер сертификата сайта {#SITEADDRESS}'
+              name: 'Серийный номер сертификата сайта {#SITEADDRESS}:{#SITEPORT}'
               type: DEPENDENT
-              key: 'ssl.cert.serial_number[{#SITEADDRESS}]'
+              key: 'ssl.cert.serial_number[{#SITEADDRESS}:{#SITEPORT}]'
               delay: '0'
               history: 7d
               trends: '0'
               value_type: CHAR
-              description: 'Серийный номер сертификата для сайта {#SITEADDRESS}. Выдаётся CN.'
+              description: |
+                Серийный номер сертификата для сайта {#SITEADDRESS}:{#SITEPORT}. Выдаётся CN.
+                
+                Описание сайта: {#SITEDESCRIPTION}
+                Путь ключей для обновления: {#SITEKEYPATH}
               preprocessing:
                 -
                   type: JSONPATH
@@ -261,17 +305,21 @@ zabbix_export:
                   value: SSL
                 -
                   tag: Site
-                  value: '{#SITEADDRESS}'
+                  value: '{#SITEADDRESS}:{#SITEPORT}'
             -
               uuid: 65e86c1be795443199599d5733b81c91
-              name: 'Отпечаток сертификата сайта {#SITEADDRESS}'
+              name: 'Отпечаток сертификата сайта {#SITEADDRESS}:{#SITEPORT}'
               type: DEPENDENT
-              key: 'ssl.cert.sha1_fingerprint[{#SITEADDRESS}]'
+              key: 'ssl.cert.sha1_fingerprint[{#SITEADDRESS}:{#SITEPORT}]'
               delay: '0'
               history: 7d
               trends: '0'
               value_type: CHAR
-              description: 'Отпечаток для сайта {#SITEADDRESS}. Позволяет обнаружить подмену.'
+              description: |
+                Отпечаток для сайта {#SITEADDRESS}:{#SITEPORT}. Позволяет обнаружить подмену.
+                
+                Описание сайта: {#SITEDESCRIPTION}
+                Путь ключей для обновления: {#SITEKEYPATH}
               preprocessing:
                 -
                   type: JSONPATH
@@ -285,49 +333,44 @@ zabbix_export:
                   value: SSL
                 -
                   tag: Site
-                  value: '{#SITEADDRESS}'
+                  value: '{#SITEADDRESS}:{#SITEPORT}'
               trigger_prototypes:
                 -
                   uuid: b9da546049a84442ba43ff1094860a8f
-                  expression: 'change(/Template SSL cert monitoring/ssl.cert.sha1_fingerprint[{#SITEADDRESS}])=1'
-                  name: 'Сертификат сайта {#SITEADDRESS} сменился'
+                  expression: 'change(/Template SSL cert monitoring/ssl.cert.sha1_fingerprint[{#SITEADDRESS}:{#SITEPORT}])=1'
+                  name: 'Сертификат сайта {#SITEADDRESS}:{#SITEPORT} сменился'
                   priority: INFO
-                  description: 'Информация о смене сертификата'
+                  description: |
+                    Информация о смене сертификата
+                    
+                    Описание сайта: {#SITEDESCRIPTION}
+                    Путь ключей для обновления: {#SITEKEYPATH}
                   manual_close: 'YES'
                   dependencies:
                     -
-                      name: 'Сертификат сайта {#SITEADDRESS} недоступен'
-                      expression: 'nodata(/Template SSL cert monitoring/ssl.cert.not_after[{#SITEADDRESS}],8h)=1'
+                      name: 'Нет свежих данных по сертификату {#SITEADDRESS}:{#SITEPORT}'
+                      expression: 'nodata(/Template SSL cert monitoring/ssl.cert.not_after[{#SITEADDRESS}:{#SITEPORT}],8h)=1'
                   tags:
                     -
                       tag: Application
                       value: SSL
                     -
                       tag: Site
-                      value: '{#SITEADDRESS}'
-                -
-                  uuid: 23eb91cd27b04bb0ba8f49f4714a7fc7
-                  expression: 'change(/Template SSL cert monitoring/ssl.cert.sha1_fingerprint[{#SITEADDRESS}])=1'
-                  name: 'Сменился сертификат для сайт {#SITEADDRESS}'
-                  priority: INFO
-                  manual_close: 'YES'
-                  tags:
-                    -
-                      tag: Application
-                      value: SSL
-                    -
-                      tag: Site
-                      value: '{#SITEADDRESS}'
+                      value: '{#SITEADDRESS}:{#SITEPORT}'
             -
               uuid: 4755bad1b79e4522a10224fedc71366b
-              name: 'Алгоритм подписи ключа сертификата сайта {#SITEADDRESS}'
+              name: 'Алгоритм подписи ключа сертификата сайта {#SITEADDRESS}:{#SITEPORT}'
               type: DEPENDENT
-              key: 'ssl.cert.signature_algorithm[{#SITEADDRESS}]'
+              key: 'ssl.cert.signature_algorithm[{#SITEADDRESS}:{#SITEPORT}]'
               delay: '0'
               history: 7d
               trends: '0'
               value_type: CHAR
-              description: 'Алгоритм подписи ключа сертификата для сайта {#SITEADDRESS}'
+              description: |
+                Алгоритм подписи ключа сертификата для сайта {#SITEADDRESS}:{#SITEPORT}
+                
+                Описание сайта: {#SITEDESCRIPTION}
+                Путь ключей для обновления: {#SITEKEYPATH}
               preprocessing:
                 -
                   type: JSONPATH
@@ -341,17 +384,21 @@ zabbix_export:
                   value: SSL
                 -
                   tag: Site
-                  value: '{#SITEADDRESS}'
+                  value: '{#SITEADDRESS}:{#SITEPORT}'
             -
               uuid: 4828d932aa5e47a9a80342da85df07cc
-              name: 'Subject для сайта {#SITEADDRESS}'
+              name: 'Subject для сайта {#SITEADDRESS}:{#SITEPORT}'
               type: DEPENDENT
-              key: 'ssl.cert.subject[{#SITEADDRESS}]'
+              key: 'ssl.cert.subject[{#SITEADDRESS}:{#SITEPORT}]'
               delay: '0'
               history: 7d
               trends: '0'
               value_type: TEXT
-              description: 'Subject для сертификата сайта {#SITEADDRESS}'
+              description: |
+                Subject для сертификата сайта {#SITEADDRESS}:{#SITEPORT}
+                
+                Описание сайта: {#SITEDESCRIPTION}
+                Путь ключей для обновления: {#SITEKEYPATH}
               preprocessing:
                 -
                   type: JSONPATH
@@ -365,17 +412,21 @@ zabbix_export:
                   value: SSL
                 -
                   tag: Site
-                  value: '{#SITEADDRESS}'
+                  value: '{#SITEADDRESS}:{#SITEPORT}'
             -
               uuid: 47817708b3c0492ca877a34764b8e117
-              name: 'Результат валидации сертификата для сайта {#SITEADDRESS}'
+              name: 'Результат валидации сертификата для сайта {#SITEADDRESS}:{#SITEPORT}'
               type: DEPENDENT
-              key: 'ssl.cert.value[{#SITEADDRESS}]'
+              key: 'ssl.cert.value[{#SITEADDRESS}:{#SITEPORT}]'
               delay: '0'
               history: 7d
               trends: '0'
               value_type: CHAR
-              description: 'Результат проверки сертификата для сайта {#SITEADDRESS}. Возможные значения: valid/invalid/valid-but-self-signed'
+              description: |
+                Результат проверки сертификата для сайта {#SITEADDRESS}:{#SITEPORT}. Возможные значения: valid/invalid/valid-but-self-signed
+                
+                Описание сайта: {#SITEDESCRIPTION}
+                Путь ключей для обновления: {#SITEKEYPATH}
               preprocessing:
                 -
                   type: JSONPATH
@@ -389,36 +440,44 @@ zabbix_export:
                   value: SSL
                 -
                   tag: Site
-                  value: '{#SITEADDRESS}'
+                  value: '{#SITEADDRESS}:{#SITEPORT}'
               trigger_prototypes:
                 -
                   uuid: d56672631ba64b04be503cb4c61c6d3c
-                  expression: 'find(/Template SSL cert monitoring/ssl.cert.value[{#SITEADDRESS}],,"like","invalid")=1'
-                  name: 'Сертификат сайта {#SITEADDRESS} не прошёл валидацию'
+                  expression: 'find(/Template SSL cert monitoring/ssl.cert.value[{#SITEADDRESS}:{#SITEPORT}],,"like","invalid")=1'
+                  name: 'Сертификат сайта {#SITEADDRESS}:{#SITEPORT} не прошёл валидацию'
                   priority: DISASTER
-                  description: 'Тревога, если сертификат не прошёл проверку на валидацию'
+                  description: |
+                    Тревога, если сертификат не прошёл проверку на валидацию
+                    
+                    Описание сайта: {#SITEDESCRIPTION}
+                    Путь ключей для обновления: {#SITEKEYPATH}
                   manual_close: 'YES'
                   dependencies:
                     -
-                      name: 'Сертификат сайта {#SITEADDRESS} недоступен'
-                      expression: 'nodata(/Template SSL cert monitoring/ssl.cert.not_after[{#SITEADDRESS}],8h)=1'
+                      name: 'Нет свежих данных по сертификату {#SITEADDRESS}:{#SITEPORT}'
+                      expression: 'nodata(/Template SSL cert monitoring/ssl.cert.not_after[{#SITEADDRESS}:{#SITEPORT}],8h)=1'
                   tags:
                     -
                       tag: Application
                       value: SSL
                     -
                       tag: Site
-                      value: '{#SITEADDRESS}'
+                      value: '{#SITEADDRESS}:{#SITEPORT}'
             -
               uuid: 015aa401dabb42c482f5e9b94b5d6901
-              name: 'Версия сертификата для сайта {#SITEADDRESS}'
+              name: 'Версия сертификата для сайта {#SITEADDRESS}:{#SITEPORT}'
               type: DEPENDENT
-              key: 'ssl.cert.version[{#SITEADDRESS}]'
+              key: 'ssl.cert.version[{#SITEADDRESS}:{#SITEPORT}]'
               delay: '0'
               history: 7d
               trends: '0'
               value_type: CHAR
-              description: 'Версия сертификата для сайта {#SITEADDRESS}.'
+              description: |
+                Версия сертификата для сайта {#SITEADDRESS}:{#SITEPORT}.
+                
+                Описание сайта: {#SITEDESCRIPTION}
+                Путь ключей для обновления: {#SITEKEYPATH}
               preprocessing:
                 -
                   type: JSONPATH
@@ -432,34 +491,37 @@ zabbix_export:
                   value: SSL
                 -
                   tag: Site
-                  value: '{#SITEADDRESS}'
+                  value: '{#SITEADDRESS}:{#SITEPORT}'
             -
               uuid: 6a55ad05240e4ec39fa5566ec07ab9a5
-              name: 'Сырые данные о сайте: {#SITEADDRESS}'
+              name: 'Сырые данные о сайте: {#SITEADDRESS}:{#SITEPORT}'
               key: 'web.certificate.get[{#SITEADDRESS},{#SITEPORT}]'
               delay: 1h
               history: '0'
               trends: '0'
               value_type: TEXT
+              description: |
+                Описание сайта: {#SITEDESCRIPTION}
+                Путь ключей для обновления: {#SITEKEYPATH}
               tags:
                 -
                   tag: Application
                   value: 'SSL RAW'
                 -
                   tag: Site
-                  value: '{#SITEADDRESS}'
+                  value: '{#SITEADDRESS}:{#SITEPORT}'
       macros:
         -
           macro: '{$SSL.EXPIRY.ALARM}'
-          value: '15'
+          value: '7'
           description: 'Количество дней до триггера Тревога конца действия сертификата'
         -
           macro: '{$SSL.EXPIRY.INFO}'
-          value: '90'
+          value: '30'
           description: 'Количество дней до триггера Информация конца действия сертификата'
         -
           macro: '{$SSL.EXPIRY.WARN}'
-          value: '30'
+          value: '14'
           description: 'Количество дней до триггера Предупреждение конца действия сертификата'
       valuemaps:
         -

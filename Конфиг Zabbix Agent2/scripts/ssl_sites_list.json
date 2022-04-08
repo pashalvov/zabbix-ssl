@@ -1,12 +1,16 @@
 {
-    "data":  [
-                 {
-                     "{#SITEADDRESS}":  "https://google.com/",
-                     "{#SITEPORT}":  443
-                 },
-                 {
-                     "{#SITEADDRESS}":  "https://ya.ru/",
-                     "{#SITEPORT}":  443
-                 }
-             ]
+  "data": [
+    {
+      "{#SITEADDRESS}": "https://my.syte.org",
+      "{#SITEPORT}": 443,
+      "{#SITEDESCRIPTION}": "Основной инстанс",
+      "{#SITEKEYPATH}": "/etc/ssl/"
+    },
+    {
+      "{#SITEADDRESS}": "https://second.site.org",
+      "{#SITEPORT}": 443,
+      "{#SITEDESCRIPTION}": "Ещё один сайт",
+      "{#SITEKEYPATH}": "cerbot"
+    }
+  ]
 }
